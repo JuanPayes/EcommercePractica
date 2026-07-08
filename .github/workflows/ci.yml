@@ -22,4 +22,5 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Maven
+        working-directory: Ecommerse
         run: mvn clean install
