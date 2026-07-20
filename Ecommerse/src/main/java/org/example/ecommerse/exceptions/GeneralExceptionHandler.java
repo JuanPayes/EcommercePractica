@@ -84,6 +84,16 @@ public class GeneralExceptionHandler {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
+    @ExceptionHandler(ProductNotPurchasedException.class)
+    public ResponseEntity<ApiErrorResponse> handleProductNotPurchased(ProductNotPurchasedException e) {
+        return buildErrorResponse(HttpStatus.FORBIDDEN, e.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateReviewException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateReview(DuplicateReviewException e) {
+        return buildErrorResponse(HttpStatus.CONFLICT, e.getMessage());
+    }
+
     private ResponseEntity<ApiErrorResponse> buildErrorResponse(HttpStatus status, Object message) {
         String url = ServletUriComponentsBuilder.fromCurrentRequestUri().build().getPath();
         ApiErrorResponse errorResponse = new ApiErrorResponse(
