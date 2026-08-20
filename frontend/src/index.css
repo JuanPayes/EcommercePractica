@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+    --font-sans: "Roboto", sans-serif;
+    --color-sky-light: #219ebc;
+    --color-teal: #219ebc;
+    --color-navy: #023047;
+    --color-amber: #ffb703;
+    --color-orange: #fb8500;
+}
