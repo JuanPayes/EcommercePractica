@@ -7,11 +7,13 @@ import org.example.ecommerse.domains.dto.response.order.OrderResponse;
 import org.example.ecommerse.domains.entities.*;
 import org.example.ecommerse.exceptions.InsufficientStockException;
 import org.example.ecommerse.exceptions.ResourceNotFoundException;
+import org.example.ecommerse.helpers.enums.OrderStatus;
 import org.example.ecommerse.helpers.mappers.OrderMapper;
 import org.example.ecommerse.repositories.AddressRepository;
 import org.example.ecommerse.repositories.OrderRepository;
 import org.example.ecommerse.repositories.ProductRepository;
 import org.example.ecommerse.repositories.UserRepository;
+import org.example.ecommerse.services.product.ProductService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
+    private final ProductService productService;
 
 
     @Transactional
@@ -37,6 +40,9 @@ public class OrderService {
 
         Address direccion = addressRepository.findById(dto.direccionId())
                 .orElseThrow(() -> new ResourceNotFoundException("Dirección no encontrada"));
+        if (!direccion.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Esta dirección no te pertenece");
+        }
 
         Order order = new Order();
         order.setUser(user);
@@ -103,5 +109,27 @@ public class OrderService {
         }
 
         return OrderMapper.toResponse(order);
+    }
+
+    @Transactional
+    public OrderResponse cancelar(Long orderId, Long userId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Orden no encontrada"));
+
+        if (!order.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("No tienes permiso para cancelar esta orden");
+        }
+
+        if (order.getEstado() != OrderStatus.PENDING) {
+            throw new IllegalArgumentException(
+                    "Solo se pueden cancelar órdenes pendientes de pago. Estado actual: " + order.getEstado());
+        }
+
+        for (OrderItem item : order.getItems()) {
+            productService.restaurarStock(item.getProduct().getId(), item.getCantidad());
+        }
+
+        order.setEstado(OrderStatus.CANCELLED);
+        return OrderMapper.toResponse(orderRepository.save(order));
     }
 }
