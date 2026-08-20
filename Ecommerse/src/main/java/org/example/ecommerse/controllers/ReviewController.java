@@ -38,5 +38,5 @@ public class ReviewController {
     public ResponseEntity<GeneralResponse> obtenerRating(@PathVariable Long productId) {
         var rating = reviewService.obtenerRating(productId);
         return ResponseEntity.ok(ResponseBuilder.build("Rating calculado", 200, rating));
-    }   
+    }
 }
