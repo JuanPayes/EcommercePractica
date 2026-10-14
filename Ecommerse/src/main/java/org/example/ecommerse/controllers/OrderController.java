@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/ordenes")
-public class OrderController {
+public class    OrderController {
 
     private final OrderService orderService;
 
@@ -40,5 +40,12 @@ public class OrderController {
                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
         var orden = orderService.buscarPorIdYUsuario(id, userDetails.getId());
         return ResponseEntity.ok(ResponseBuilder.build("Orden encontrada", 200, orden));
+    }
+
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<GeneralResponse> cancelar(@PathVariable Long id,
+                                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var orden = orderService.cancelar(id, userDetails.getId());
+        return ResponseEntity.ok(ResponseBuilder.build("Orden cancelada", 200, orden));
     }
 }

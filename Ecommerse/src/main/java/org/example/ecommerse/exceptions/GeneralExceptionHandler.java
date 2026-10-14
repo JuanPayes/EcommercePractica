@@ -1,5 +1,6 @@
 package org.example.ecommerse.exceptions;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.example.ecommerse.domains.dto.response.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -92,6 +93,10 @@ public class GeneralExceptionHandler {
     @ExceptionHandler(DuplicateReviewException.class)
     public ResponseEntity<ApiErrorResponse> handleDuplicateReview(DuplicateReviewException e) {
         return buildErrorResponse(HttpStatus.CONFLICT, e.getMessage());
+    }
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiErrorResponse> handleExpiredJwt(ExpiredJwtException e) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Tu sesión expiró. Por favor inicia sesión de nuevo.");
     }
 
     private ResponseEntity<ApiErrorResponse> buildErrorResponse(HttpStatus status, Object message) {

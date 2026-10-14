@@ -14,7 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/api/review")
+@RequestMapping("/api/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 
@@ -38,5 +38,12 @@ public class ReviewController {
     public ResponseEntity<GeneralResponse> obtenerRating(@PathVariable Long productId) {
         var rating = reviewService.obtenerRating(productId);
         return ResponseEntity.ok(ResponseBuilder.build("Rating calculado", 200, rating));
+    }
+
+    @GetMapping("/producto/{productId}/puede-calificar")
+    public ResponseEntity<GeneralResponse> puedeCalificar(@PathVariable Long productId,
+                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        boolean puede = reviewService.puedeCalificar(userDetails.getId(), productId);
+        return ResponseEntity.ok(ResponseBuilder.build("Verificación completada", 200, puede));
     }
 }
