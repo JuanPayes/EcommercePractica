@@ -39,4 +39,11 @@ public class ReviewController {
         var rating = reviewService.obtenerRating(productId);
         return ResponseEntity.ok(ResponseBuilder.build("Rating calculado", 200, rating));
     }
+
+    @GetMapping("/producto/{productId}/puede-calificar")
+    public ResponseEntity<GeneralResponse> puedeCalificar(@PathVariable Long productId,
+                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        boolean puede = reviewService.puedeCalificar(userDetails.getId(), productId);
+        return ResponseEntity.ok(ResponseBuilder.build("Verificación completada", 200, puede));
+    }
 }

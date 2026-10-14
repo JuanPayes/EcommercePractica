@@ -33,17 +33,13 @@ public class ReviewService {
 
     @Transactional
     public ReviewResponse crear(Long userId, ReviewRequest dto) {
-        boolean compro = orderItemRepository.existsByProduct_IdAndOrder_UserIdAndOrder_Estado(
-                dto.productoId(), userId, OrderStatus.PAID);
 
-        if (!compro) {
-            throw new ProductNotPurchasedException(
-                    "Solo puedes calificar productos que hayas comprado y pagado");
+        if(!haComprado(userId, dto.productoId())) {
+            throw new ProductNotPurchasedException("Solo puedes calificar productos que hayas comprado y pagado");
         }
 
-        if (reviewRepository.existsByUserIdAndProductId(userId, dto.productoId())) {
-            throw new DuplicateReviewException(
-                    "Ya has calificado este producto anteriormente");
+        if(yaCalifico(userId, dto.productoId())) {
+            throw new DuplicateReviewException("Ya has calificado este producto anteriormente");
         }
 
         Product product = productRepository.findById(dto.productoId())
@@ -78,5 +74,19 @@ public class ReviewService {
                 promedio != null ? Math.round(promedio * 10) / 10.0 : 0.0,
                 total
         );
+    }
+
+    @Transactional(readOnly = true)
+    public boolean puedeCalificar(Long userId, Long productId) {
+        return haComprado(userId, productId) && !yaCalifico(userId, productId);
+    }
+
+    private boolean haComprado(Long userId, Long productId) {
+        return orderItemRepository.existsByProduct_IdAndOrder_UserIdAndOrder_Estado(
+                productId, userId, OrderStatus.PAID);
+    }
+
+    private boolean yaCalifico(Long userId, Long productId) {
+        return reviewRepository.existsByUserIdAndProductId(userId, productId);
     }
 }
