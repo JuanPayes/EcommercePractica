@@ -1,4 +1,3 @@
-// frontend/src/components/layout/Header.tsx
 import type { ReactNode } from 'react';
 import { Icon } from '@/components/common/Icon';
 

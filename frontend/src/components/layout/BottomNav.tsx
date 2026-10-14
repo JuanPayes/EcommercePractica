@@ -1,6 +1,6 @@
-// frontend/src/components/layout/BottomNav.tsx
 import { NavLink } from 'react-router-dom';
 import { Icon } from '@/components/common/Icon';
+import { useCart } from '@/hooks/useCart';
 
 const navItems = [
     { to: '/', label: 'Home', icon: 'home' },
@@ -10,6 +10,7 @@ const navItems = [
 ];
 
 export function BottomNav() {
+    const { itemCount } = useCart();
     return (
         <nav className="h-16 bg-white border-t border-navy/10 flex items-center justify-around shrink-0">
             {navItems.map((item) => (
@@ -23,7 +24,17 @@ export function BottomNav() {
                 >
                     {({ isActive }) => (
                         <>
-                            <Icon name={item.icon} filled={isActive} className="text-2xl" />
+                            <div className="relative">
+                                <Icon name={item.icon} filled={isActive} className="text-2xl" />
+                                {item.to === '/carrito' && itemCount > 0 && (
+                                    <span
+                                        key={itemCount}
+                                        className="absolute -top-1 -right-2 min-w-4.5 h-4.5 px-1 rounded-full bg-orange text-white text-[10px] font-bold flex items-center justify-center motion-safe:animate-pop"
+                                    >
+                                        {itemCount > 9 ? '9+' : itemCount}
+                                    </span>
+                                )}
+                            </div>
                             <span className={`text-[10px] ${isActive ? 'font-bold' : ''}`}>{item.label}</span>
                         </>
                     )}
