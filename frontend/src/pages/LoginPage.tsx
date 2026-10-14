@@ -1,11 +1,14 @@
 import { useState, type SubmitEventHandler } from 'react';;
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
 
 export function LoginPage() {
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    const from: string = location.state?.from ?? '/';
+
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -18,7 +21,7 @@ export function LoginPage() {
         setLoading(true);
         try {
             await login({ email, password });
-            navigate('/');
+            navigate(from, { replace: true });
         } catch {
             setError('Email o contraseña incorrectos');
         } finally {
@@ -65,7 +68,7 @@ export function LoginPage() {
 
                 <p className="text-center text-[13px] text-navy/60 mt-2">
                     ¿No tienes cuenta?{' '}
-                    <Link to="/register" className="text-teal font-semibold">
+                    <Link to="/register" state={{ from }} className="text-teal font-semibold">
                         Regístrate
                     </Link>
                 </p>
