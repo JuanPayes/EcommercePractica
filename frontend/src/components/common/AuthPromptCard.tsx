@@ -1,22 +1,23 @@
-import { Link } from 'react-router-dom';
-import { Icon } from './Icon';
+import { AuthButtons } from './AuthButtons';
 
-export function AuthPromptCard() {
+type AuthPromptCardProps = {
+    title?: string;
+    description?: string;
+    redirectTo?: string;
+};
+
+export function AuthPromptCard({
+    title = 'Inicia sesión para comprar',
+    description,
+    redirectTo = '/',
+}: AuthPromptCardProps) {
     return (
-        <div className="mx-5 mb-5 rounded-2xl border border-navy/10 bg-sky-light/15 p-4 flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-navy flex items-center justify-center shrink-0">
-                <Icon name="person" className="text-white text-2xl" />
+        <div className="rounded-2xl border border-navy/10 bg-sky-light/15 p-5 flex flex-col items-center text-center">
+            <h3 className="text-[16px] font-bold text-navy">{title}</h3>
+            {description && <p className="text-[13px] text-navy/60 mt-1">{description}</p>}
+            <div className="mt-4 w-full">
+                <AuthButtons redirectTo={redirectTo} />
             </div>
-            <div className="flex-1">
-                <div className="text-[13px] font-bold text-navy">Únete a la tienda</div>
-                <div className="text-[12px] text-navy/60">Inicia sesión para comprar y calificar productos</div>
-            </div>
-            <Link
-                to="/login"
-                className="shrink-0 bg-orange text-white text-[12px] font-bold px-3.5 py-2 rounded-lg"
-            >
-                Entrar
-            </Link>
         </div>
     );
 }

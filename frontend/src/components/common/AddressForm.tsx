@@ -1,5 +1,7 @@
 import { useState, type SubmitEventHandler } from 'react';
 import type { AddressRequest } from '@/types/address.types';
+import { logError } from '@/utils/logger';
+import { getErrorMessage } from '@/utils/errors';
 
 type AddressFormProps = {
     onSubmit: (dto: AddressRequest) => Promise<void>;
@@ -12,12 +14,17 @@ export function AddressForm({ onSubmit, onCancel }: AddressFormProps) {
     const [referencia, setReferencia] = useState('');
     const [esPrincipal, setEsPrincipal] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
+        setError(null);
         setLoading(true);
         try {
             await onSubmit({ calle, ciudad, referencia, esPrincipal });
+        } catch (err) {
+            logError('AddressForm', err);
+            setError(getErrorMessage(err, 'No se pudo guardar la dirección'));
         } finally {
             setLoading(false);
         }
@@ -56,6 +63,9 @@ export function AddressForm({ onSubmit, onCancel }: AddressFormProps) {
                 />
                 Marcar como dirección principal
             </label>
+
+            {error && <p className="text-[13px] text-red-600">{error}</p>}
+
 
             <div className="flex gap-2 mt-1">
                 <button
