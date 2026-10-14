@@ -3,13 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ProductImageHero } from '@/components/product/ProductImageHero';
 import { RatingStars } from '@/components/product/RatingStars';
 import { getProductById } from '@/api/products';
-import { getReviewsByProduct, getProductRating, createReview } from '@/api/reviews';
+import { getReviewsByProduct, getProductRating, createReview, canReviewProduct } from '@/api/reviews';
 import { useCart } from '@/hooks/useCart';
 import type { ProductResponse } from '@/types/product.types';
 import type { ReviewResponse, ProductRatingResponse, ReviewRequest } from '@/types/review.types';
 import { useAuth } from '@/hooks/useAuth';
 import { Modal } from '@/components/common/Modal';
 import { ReviewForm } from '@/components/product/ReviewForm';
+import { Icon } from '@/components/common/Icon';
+import { NotFoundPage } from '@/pages/NotFoundPage';
 
 export function ProductDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -23,8 +25,26 @@ export function ProductDetailPage() {
     const { addItem } = useCart();
 
     const { isAuthenticated } = useAuth();
+    const [canReview, setCanReview] = useState(false);
     const [showReviewModal, setShowReviewModal] = useState(false);
 
+    const [justAdded, setJustAdded] = useState(false);
+
+    useEffect(() => {
+        if (!justAdded) return;
+        const timer = setTimeout(() => setJustAdded(false), 1500);
+        return () => clearTimeout(timer);
+    }, [justAdded]);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            setCanReview(false);
+            return;
+        }
+        canReviewProduct(productId)
+            .then(setCanReview)
+            .catch(() => setCanReview(false));
+    }, [productId, isAuthenticated]);
 
     useEffect(() => {
         async function loadData() {
@@ -50,12 +70,13 @@ export function ProductDetailPage() {
     function handleAddToCart() {
         if (!product) return;
         addItem(product);
-
+        setJustAdded(true);
     }
 
     async function handleReviewSubmit(dto: ReviewRequest) {
         await createReview(dto);
         setShowReviewModal(false);
+        setCanReview(false);
 
         const [ratingData, reviewsData] = await Promise.all([
             getProductRating(productId),
@@ -70,7 +91,7 @@ export function ProductDetailPage() {
     }
 
     if (!product) {
-        return <p className="text-center text-navy/50 text-sm py-8">Producto no encontrado</p>;
+        return <NotFoundPage />;
     }
 
     const reviewsToShow = reviews.slice(0, 3);
@@ -98,6 +119,8 @@ export function ProductDetailPage() {
                     ${product.precio.toFixed(2)}
                 </div>
 
+
+
                 {product.descripcion && (
                     <>
                         <div className="h-px bg-navy/10 my-4" />
@@ -113,7 +136,7 @@ export function ProductDetailPage() {
                     {reviews.length > 3 && (
                         <button className="text-[13px] text-teal font-semibold">Ver todas</button>
                     )}
-                    {isAuthenticated && (
+                    {canReview && (
                         <button
                             onClick={() => setShowReviewModal(true)}
                             className="text-[15px] text-teal font-semibold"
@@ -150,9 +173,17 @@ export function ProductDetailPage() {
             <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto px-5 py-3 bg-white border-t border-navy/10">
                 <button
                     onClick={handleAddToCart}
-                    className="w-full bg-orange text-white font-bold py-3.5 rounded-xl"
+                    className={`w-full font-bold py-3.5 rounded-xl text-white flex items-center justify-center gap-2 transition-colors duration-300 ${justAdded ? 'bg-teal' : 'bg-orange'
+                        }`}
                 >
-                    Agregar al carrito
+                    {justAdded ? (
+                        <>
+                            <Icon name="check_circle" filled className="text-xl motion-safe:animate-pop" />
+                            Agregado al carrito
+                        </>
+                    ) : (
+                        'Agregar al carrito'
+                    )}
                 </button>
             </div>
             <Modal isOpen={showReviewModal} onClose={() => setShowReviewModal(false)} title="Calificar producto">

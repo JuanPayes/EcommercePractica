@@ -38,7 +38,11 @@ export function HomePage() {
             <Header title="tienda" cutColor="orange" cutSide="right" />
 
             <div className="pt-4">
-                {!isAuthenticated && <AuthPromptCard />}
+                {!isAuthenticated && (
+                    <div className="mx-5 mb-5">
+                        <AuthPromptCard />
+                    </div>
+                )}
 
                 <PromoBanner />
 
