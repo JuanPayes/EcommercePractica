@@ -12,3 +12,13 @@ export async function createOrder(dto: OrderCreateRequest): Promise<OrderRespons
     const response = await apiClient.post<GeneralResponse<OrderResponse>>('/ordenes', dto);
     return response.data.data;
 }
+
+export async function getOrderById(id: number): Promise<OrderResponse> {
+    const response = await apiClient.get<GeneralResponse<OrderResponse>>(`/ordenes/${id}`);
+    return response.data.data;
+}
+
+export async function cancelOrder(id: number): Promise<OrderResponse> {
+    const response = await apiClient.patch<GeneralResponse<OrderResponse>>(`/ordenes/${id}/cancelar`);
+    return response.data.data;
+}

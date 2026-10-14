@@ -19,3 +19,10 @@ export async function createReview(dto: ReviewRequest): Promise<ReviewResponse> 
     const response = await apiClient.post<GeneralResponse<ReviewResponse>>('/reviews', dto);
     return response.data.data;
 }
+
+export async function canReviewProduct(productId: number): Promise<boolean> {
+    const response = await apiClient.get<GeneralResponse<boolean>>(
+        `/reviews/producto/${productId}/puede-calificar`,
+    );
+    return response.data.data;
+}
