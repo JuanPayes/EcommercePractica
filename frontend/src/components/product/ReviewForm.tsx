@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { StarRatingInput } from './StarRatingInput';
 import type { ReviewRequest } from '@/types/review.types';
+import { getErrorMessage } from '@/utils/errors';
+import { logError } from '@/utils/logger';
 
 type ReviewFormProps = {
     productoId: number;
@@ -26,12 +28,13 @@ export function ReviewForm({ productoId, onSubmit }: ReviewFormProps) {
             await onSubmit({ productoId, puntuacion, comentario });
         } catch (err: any) {
             const status = err?.response?.status;
+            logError('ReviewForm', err);
             if (status === 403) {
-                setError('Solo puedes calificar productos que hayas comprado y pagado');
+                setError(getErrorMessage(err, 'Solo puedes calificar productos que hayas comprado y pagado'));
             } else if (status === 409) {
-                setError('Ya calificaste este producto anteriormente');
+                setError(getErrorMessage(err, 'Ya calificaste este producto anteriormente'));
             } else {
-                setError('No se pudo enviar tu reseña. Intenta de nuevo.');
+                setError(getErrorMessage(err, 'No se pudo enviar tu reseña. Intenta de nuevo.'));
             }
         } finally {
             setLoading(false);
